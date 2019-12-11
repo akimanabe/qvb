@@ -1,7 +1,7 @@
 # fit masaba
 
 sabadata <-
-  read.csv("masabadata.csv") %>%
+  read.csv("C:/Rfiles/ALK2/masabadata.csv") %>%
   dplyr::as_tibble() %>%
   dplyr::mutate(Yearclass = as.factor(Yearclass))
 
@@ -142,3 +142,4 @@ grapher <-
     color="red", size=1
   )
 
+## other years
