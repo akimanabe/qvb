@@ -2,9 +2,10 @@
 # 2009:2012の４年
 shared <-
 function(data, What, r, t0, q1, tau1, q2, tau2, q3, tau3, q4, tau4){
+
   yearchoice <- 2009
   FL <- data %>% dplyr::filter(Yearclass == yearchoice) %>% dplyr::select(FL)
-  age <- data %>% dplyr::filter(Yearclass == 2009) %>% dplyr::select(Age2)
+  age <- data %>% dplyr::filter(Yearclass == yearchoice) %>% dplyr::select(Age2)
 
   qvb09 <-
     function(What, r, q1, tau1, t0){
@@ -13,8 +14,10 @@ function(data, What, r, t0, q1, tau1, q2, tau2, q3, tau3, q4, tau4){
 
   loglikeli09 <-
     function(What, r, q1, tau1, t0){
-            -sum(dnorm(FL, qvb09(What, r, q1, tau1, t0), log = TRUE))
+            -sum(dnorm(unlist(unname(FL)), qvb09(What, r, q1, tau1, t0), log = TRUE))
     }
+
+
   yearchoice <- 2010
   FL <- data %>% dplyr::filter(Yearclass == yearchoice) %>% dplyr::select(FL)
   age <- data %>% dplyr::filter(Yearclass == yearchoice) %>% dplyr::select(Age2)
@@ -26,7 +29,7 @@ function(data, What, r, t0, q1, tau1, q2, tau2, q3, tau3, q4, tau4){
 
   loglikeli10 <-
     function(What, r, q2, tau2, t0){
-      -sum(dnorm(FL, qvb10(What, r, q2, tau2, t0), log = TRUE))
+      -sum(dnorm(unlist(unname(FL)), qvb10(What, r, q2, tau2, t0), log = TRUE))
     }
 
   yearchoice <- 2011
@@ -40,7 +43,7 @@ function(data, What, r, t0, q1, tau1, q2, tau2, q3, tau3, q4, tau4){
 
   loglikeli11 <-
     function(What, r, q3, tau3, t0){
-      -sum(dnorm(FL, qvb11(What, r, q3, tau3, t0), log = TRUE))
+      -sum(dnorm(unlist(unname(FL)), qvb11(What, r, q3, tau3, t0), log = TRUE))
     }
 
   yearchoice <- 2012
@@ -54,13 +57,13 @@ function(data, What, r, t0, q1, tau1, q2, tau2, q3, tau3, q4, tau4){
 
   loglikeli12 <-
     function(What, r, q4, tau4, t0){
-      -sum(dnorm(FL, qvb12(What, r, q4, tau4, t0), log = TRUE))
+      -sum(dnorm(unlist(unname(FL)), qvb12(What, r, q4, tau4, t0), log = TRUE))
     }
 
   theloglik <- function(What, r, t0, q1, tau1, q2, tau2, q3, tau3, q4, tau4)
-    loglikeli09(What, r, q1, tau1, t0)-
-    loglikeli10(What, r, q2, tau2, t0)-
-    loglikeli11(What, r, q3, tau3, t0)-
+    loglikeli09(What, r, q1, tau1, t0)+
+    loglikeli10(What, r, q2, tau2, t0)+
+    loglikeli11(What, r, q3, tau3, t0)+
     loglikeli12(What, r, q4, tau4, t0)
 
   res <- bbmle::mle2(theloglik, start=list(What=What,
@@ -76,48 +79,74 @@ function(data, What, r, t0, q1, tau1, q2, tau2, q3, tau3, q4, tau4){
                                            tau4=tau4))
 }
 
+res <-
+  shared(data = sabadata,
+       What = 300,
+       r    = 1.2,
+       t0   = -0.1,
+       q1   = 1.2,
+       tau1 = 2,
+       q2   = 1.2,
+       tau2 = 2,
+       q3   = 1.2,
+       tau3 = 2,
+       q4   = 1.2,
+       tau4 = 2)
 
 
+## semete 11 & 12 -------
 
-fit_qvb <- function(FL, age, What, r, q, tau, t0){
+shared <-
+  function(data, What, r, t0, q3, tau3, q4, tau4){
 
-  qvb <-
-    function(What, r, q, tau, t0){
-      Wt <- What * tau^r * (1- (pmax(0,1-(1-q)*(age-t0)/tau))^(1/(1-q)) )^r
-      return(Wt)
-    }
 
-  loglikeli <-
-    function(What, r, q, tau, t0){
+    yearchoice <- 2011
+    FL <- data %>% dplyr::filter(Yearclass == yearchoice) %>% dplyr::select(FL)
+    age <- data %>% dplyr::filter(Yearclass == yearchoice) %>% dplyr::select(Age2)
 
-      -sum(dnorm(FL, qvb(What, r, q, tau, t0), log = TRUE))
-    }
+    qvb11 <-
+      function(What, r, q3, tau3, t0){
+        What * tau3^r * (1- (pmax(0,1-(1-q3)*(age-t0)/tau3))^(1/(1-q3)) )^r
+      }
 
-  for(i in 1:10){
+    loglikeli11 <-
+      function(What, r, q3, tau3, t0){
+        -sum(dnorm(unlist(unname(FL)), qvb11(What, r, q3, tau3, t0), log = TRUE))
+      }
 
-    if(i==1){
+    yearchoice <- 2012
+    FL <- data %>% dplyr::filter(Yearclass == yearchoice) %>% dplyr::select(FL)
+    age <- data %>% dplyr::filter(Yearclass == yearchoice) %>% dplyr::select(Age2)
 
-      res <- mle2(loglikeli, start=list(What=What, r = r, q = q, tau = tau, t0= t0))
-      show(res)
+    qvb12 <-
+      function(What, r, q4, tau4, t0){
+        What * tau4^r * (1- (pmax(0,1-(1-q4)*(age-t0)/tau4))^(1/(1-q4)) )^r
+      }
 
-    }else{
-      res <- mle2(loglikeli, start=list(What=res@coef[1],
-                                        r = res@coef[2],
-                                        q = res@coef[3],
-                                        tau = res@coef[4],
-                                        t0=res@coef[5]))
-      show(res)
-    }
+    loglikeli12 <-
+      function(What, r, q4, tau4, t0){
+        -sum(dnorm(unlist(unname(FL)), qvb12(What, r, q4, tau4, t0), log = TRUE))
+      }
+
+    theloglik <- function(What, r, t0, q1, q3, tau3, q4, tau4){
+      loglikeli11(What, r, q3, tau3, t0)+loglikeli12(What, r, q4, tau4, t0)
+      }
+
+    res <- bbmle::mle2(theloglik, start=list(What=What,
+                                             r=r,
+                                             t0=t0,
+                                             q3=q3,
+                                             tau3=tau3,
+                                             q4=q4,
+                                             tau4=tau4))
   }
 
-  What <- res@coef[1]
-  r    <- res@coef[2]
-  q    <- res@coef[3]
-  tau  <- res@coef[4]
-  t0   <- res@coef[5]
-
-  p <<- c(What, r, q, tau, t0)
-  names(p) <<- c("What", "r", "q", "tau", "t0")
-  return(p)
-
-}
+res <-
+  shared(data = sabadata,
+         What = 300,
+         r    = 1.2,
+         t0   = -0.1,
+         q3   = 1.2,
+         tau3 = 2,
+         q4   = 1.2,
+         tau4 = 2)
