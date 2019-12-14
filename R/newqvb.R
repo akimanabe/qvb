@@ -45,54 +45,67 @@ bar <- fit.qvb(foo$FL, foo$Age2, 350, 0.8, 1.2, 1, 0)
 
 fit2 <- function(length, age, Lhat, r, q, tau, t0){
 
-
-}
-
-
-qvbL <-
-  function(Lhat, r, q, tau, t0){
-    Lhat * tau^r * (1- (pmax(0,1-(1-q)*(age-t0)/tau))^(1/(1-q)) )^r
+  LL <- function(Lhat, r, q, tau, t0){
+    -sum(dnorm(length, qvb(age, Lhat, r, q, tau, t0), log = TRUE))
   }
 
-fit_qvb <- function(FL, age, What, r, q, tau, t0){
+  res.mle <- bbmle::mle2(LL, start=list(Lhat=Lhat, r=r, q=q, tau=tau, t0=t0))
+  
+  Lhat <- res.mle@coef[1]
+  r    <- res.mle@coef[2]
+  q    <- res.mle@coef[3]
+  tau  <- res.mle@coef[4]
+  t0   <- res.mle@coef[5]
 
-  qvb <-
-    function(What, r, q, tau, t0){
-      Wt <- What * tau^r * (1- (pmax(0,1-(1-q)*(age-t0)/tau))^(1/(1-q)) )^r
-      return(Wt)
-    }
-
-  loglikeli <-
-    function(What, r, q, tau, t0){
-
-      -sum(dnorm(FL, qvb(What, r, q, tau, t0), log = TRUE))
-    }
-
-  for(i in 1:10){
-
-    if(i==1){
-
-      res <- mle2(loglikeli, start=list(What=What, r = r, q = q, tau = tau, t0= t0))
-      show(res)
-
-    }else{
-      res <- mle2(loglikeli, start=list(What=res@coef[1],
-                                        r = res@coef[2],
-                                        q = res@coef[3],
-                                        tau = res@coef[4],
-                                        t0=res@coef[5]))
-      show(res)
-    }
+  return(list(Lhat, r, q, tau, t0))
+  
   }
 
-  What <- res@coef[1]
-  r    <- res@coef[2]
-  q    <- res@coef[3]
-  tau  <- res@coef[4]
-  t0   <- res@coef[5]
-
-  p <<- c(What, r, q, tau, t0)
-  names(p) <<- c("What", "r", "q", "tau", "t0")
-  return(p)
-
-}
+# 
+# qvbL <-
+#   function(Lhat, r, q, tau, t0){
+#     Lhat * tau^r * (1- (pmax(0,1-(1-q)*(age-t0)/tau))^(1/(1-q)) )^r
+#   }
+# 
+# fit_qvb <- function(FL, age, What, r, q, tau, t0){
+# 
+#   qvb <-
+#     function(What, r, q, tau, t0){
+#       Wt <- What * tau^r * (1- (pmax(0,1-(1-q)*(age-t0)/tau))^(1/(1-q)) )^r
+#       return(Wt)
+#     }
+# 
+#   loglikeli <-
+#     function(What, r, q, tau, t0){
+# 
+#       -sum(dnorm(FL, qvb(What, r, q, tau, t0), log = TRUE))
+#     }
+# 
+#   for(i in 1:10){
+# 
+#     if(i==1){
+# 
+#       res <- mle2(loglikeli, start=list(What=What, r = r, q = q, tau = tau, t0= t0))
+#       show(res)
+# 
+#     }else{
+#       res <- mle2(loglikeli, start=list(What=res@coef[1],
+#                                         r = res@coef[2],
+#                                         q = res@coef[3],
+#                                         tau = res@coef[4],
+#                                         t0=res@coef[5]))
+#       show(res)
+#     }
+#   }
+# 
+#   What <- res@coef[1]
+#   r    <- res@coef[2]
+#   q    <- res@coef[3]
+#   tau  <- res@coef[4]
+#   t0   <- res@coef[5]
+# 
+#   p <<- c(What, r, q, tau, t0)
+#   names(p) <<- c("What", "r", "q", "tau", "t0")
+#   return(p)
+# 
+# }
