@@ -1,4 +1,4 @@
-fpath <- "C:/Rfiles/ALK2/masabadata.csv"
+fpath <- "masabadata.csv"
 
 sabadata <-
   read.csv(fpath) %>%
