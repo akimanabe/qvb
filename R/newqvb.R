@@ -19,7 +19,7 @@ qvb <-
     Lhat * tau^r * (1- (pmax(0,1-(1-q)*(age-t0)/tau))^(1/(1-q)) )^r
   }
 
-fit.qvb <- function(length, age, Lhat, r, q, tau, t0, method="OLS"){
+fit.qvb <- function(length, age, Lhat, r, q, tau, t0, method="OLS", summary=FALSE){
 
   if(method == "OLS"){
 
@@ -30,82 +30,39 @@ fit.qvb <- function(length, age, Lhat, r, q, tau, t0, method="OLS"){
     }
 
     res <- optim(p, rss)
-    return(res)
+
+    if(summary==TRUE){
+      return(res)
+    }else{
+        resp <- res$par
+        names(resp)<- c("Lhat", "r", "q", "tau", "t0")
+        return(resp)
+      }
 
   }
 
-  if(method == "MLE"){}
-
-
-
 }
 
-bar <- fit.qvb(foo$FL, foo$Age2, 350, 0.8, 1.2, 1, 0)
+bar <- fit.qvb(dat$FL, dat$Age2, 350, 0.8, 1.2, 1, 0)
 
 
-fit2 <- function(length, age, Lhat, r, q, tau, t0){
+fit.mle <- function(length, age, Lhat, r, q, tau, t0){
 
   LL <- function(Lhat, r, q, tau, t0){
     -sum(dnorm(length, qvb(age, Lhat, r, q, tau, t0), log = TRUE))
   }
 
   res.mle <- bbmle::mle2(LL, start=list(Lhat=Lhat, r=r, q=q, tau=tau, t0=t0))
-  
-  Lhat <- res.mle@coef[1]
-  r    <- res.mle@coef[2]
-  q    <- res.mle@coef[3]
-  tau  <- res.mle@coef[4]
-  t0   <- res.mle@coef[5]
 
-  return(list(Lhat, r, q, tau, t0))
-  
+  # Lhat <- res.mle@coef[1]
+  # r    <- res.mle@coef[2]
+  # q    <- res.mle@coef[3]
+  # tau  <- res.mle@coef[4]
+  # t0   <- res.mle@coef[5]
+
+  #return(list(Lhat, r, q, tau, t0))
+  return(res.mle@coef)
+
   }
 
-# 
-# qvbL <-
-#   function(Lhat, r, q, tau, t0){
-#     Lhat * tau^r * (1- (pmax(0,1-(1-q)*(age-t0)/tau))^(1/(1-q)) )^r
-#   }
-# 
-# fit_qvb <- function(FL, age, What, r, q, tau, t0){
-# 
-#   qvb <-
-#     function(What, r, q, tau, t0){
-#       Wt <- What * tau^r * (1- (pmax(0,1-(1-q)*(age-t0)/tau))^(1/(1-q)) )^r
-#       return(Wt)
-#     }
-# 
-#   loglikeli <-
-#     function(What, r, q, tau, t0){
-# 
-#       -sum(dnorm(FL, qvb(What, r, q, tau, t0), log = TRUE))
-#     }
-# 
-#   for(i in 1:10){
-# 
-#     if(i==1){
-# 
-#       res <- mle2(loglikeli, start=list(What=What, r = r, q = q, tau = tau, t0= t0))
-#       show(res)
-# 
-#     }else{
-#       res <- mle2(loglikeli, start=list(What=res@coef[1],
-#                                         r = res@coef[2],
-#                                         q = res@coef[3],
-#                                         tau = res@coef[4],
-#                                         t0=res@coef[5]))
-#       show(res)
-#     }
-#   }
-# 
-#   What <- res@coef[1]
-#   r    <- res@coef[2]
-#   q    <- res@coef[3]
-#   tau  <- res@coef[4]
-#   t0   <- res@coef[5]
-# 
-#   p <<- c(What, r, q, tau, t0)
-#   names(p) <<- c("What", "r", "q", "tau", "t0")
-#   return(p)
-# 
-# }
+fit.mle(dat$FL, dat$Age2, 350, 0.8, 1.2, 1, 0)
