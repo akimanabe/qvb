@@ -14,10 +14,12 @@
 #'
 #' @examples
 #' qvb(What=300, r=0.75, q=1.2, tau=2, t0= -0.01)
+
 qvb <-
   function(age, Lhat, r, q, tau, t0){
     Lhat * tau^r * (1- (pmax(0,1-(1-q)*(age-t0)/tau))^(1/(1-q)) )^r
   }
+
 
 #' Fit the generalized q- von Bertalanffy growth funciton
 #'
@@ -35,6 +37,7 @@ qvb <-
 #' @export
 #'
 #' @examples
+
 fit.qvb <- function(length, age, Lhat, r, q, tau, t0, method="OLS", summary=FALSE){
 
   if(method == "OLS"){
@@ -75,20 +78,3 @@ fit.qvb <- function(length, age, Lhat, r, q, tau, t0, method="OLS", summary=FALS
 
 }
 
-bar <- fit.qvb(dat$FL, dat$Age2, 350, 0.8, 1.2, 1, 0, method="MLE", summary=FALSE)
-
-
-fit.mle <- function(length, age, Lhat, r, q, tau, t0){
-
-  LL <- function(Lhat, r, q, tau, t0){
-    -sum(dnorm(length, qvb(age, Lhat, r, q, tau, t0), log = TRUE))
-  }
-
-  res.mle <- bbmle::mle2(LL, start=list(Lhat=Lhat, r=r, q=q, tau=tau, t0=t0))
-
-  #return(res.mle@coef)
-  return(bbmle::summary(res.mle))
-
-  }
-
-res <- fit.mle(dat$FL, dat$Age2, 350, 0.8, 1.2, 1, 0)
