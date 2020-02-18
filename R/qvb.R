@@ -13,7 +13,8 @@
 #' @export
 #'
 #' @examples
-#' qvb(What=300, r=0.75, q=1.2, tau=2, t0= -0.01)
+#' age <- seq(0, 10, 0.1)
+#' qvb(age, Lhat=300, r=0.75, q=1.2, tau=2, t0= -0.01)
 
 qvb <-
   function(age, Lhat, r, q, tau, t0){
