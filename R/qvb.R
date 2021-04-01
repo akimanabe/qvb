@@ -34,6 +34,8 @@ qvb <-
 #' @param method Fitting method; select either "OLS" or "MLE"
 #' @param summary if TRUE, summary is returned along with the estimated parameters
 #'
+#' @importFrom stats dnorm optim
+#'
 #' @return list
 #' @export
 #'

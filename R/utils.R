@@ -14,6 +14,5 @@
 
 loglike <- function(length, age,
                     p = list(Linf, r, q, tau, t0),takelog = TRUE){
-  -sum(stats::dnorm(qvb(age, p = p)), log = takelog)
+  -sum(stats::dnorm(qvb(age, p = list())), log = takelog)
 }
-
