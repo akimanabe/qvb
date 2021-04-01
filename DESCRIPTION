@@ -13,4 +13,6 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.0.2
 Imports: 
-    magrittr
+    magrittr,
+    bbmle,
+    ggplot2
